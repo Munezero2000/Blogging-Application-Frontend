@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import axios from 'axios';
 
 const useNewStory = () => {
     const [loading, setLoading] = useState(false);
@@ -17,31 +18,24 @@ const useNewStory = () => {
                 console.log(pair[0], pair[1]);
             }
 
-            const res = await fetch("/api/blogs/create", {
-                method: 'POST',
-                headers: {'Content-Type': "multipart/form-data"},
-                body: formData
+            console.log(formData);
+
+            const res = await axios.post("http://localhost:8081/api/blogs/create", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                withCredentials: true
             });
 
-            if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
-                    console.log(res)
-                    throw new Error("Unauthorized access. Please log in.");
-                }
-                console.log(res)
+            if (!res.data || res.status !== 200) {
                 throw new Error("Server error. Please try again later.");
             }
 
-            const result = await res.json();
+            console.log(res.data);
 
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            console.log(result);
         } catch (error) {
-            console.log(error);
-            toast.error(error.message);
+            console.error(error);
+            toast.error(error.message || "An error occurred.");
         } finally {
             setLoading(false);
         }
