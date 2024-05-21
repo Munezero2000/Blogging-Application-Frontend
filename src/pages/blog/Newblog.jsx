@@ -10,6 +10,10 @@ function Newblog() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
+
+
+
+        
         await newStory(inputs)
     }
     return (
