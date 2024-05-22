@@ -14,12 +14,6 @@ const useNewStory = () => {
             formData.append('blogThumbnail', thumbnail);
             formData.append('content', story);
 
-            for (let pair of formData.entries()) {
-                console.log(pair[0], pair[1]);
-            }
-
-            console.log(formData);
-
             const res = await axios.post("http://localhost:8081/api/blogs/create", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -31,11 +25,11 @@ const useNewStory = () => {
                 throw new Error("Server error. Please try again later.");
             }
 
-            console.log(res.data);
+            console.log(await res.data);
 
         } catch (error) {
-            console.error(error);
-            toast.error(error.message || "An error occurred.");
+            // console.error(error);
+            toast.error(error.response?.data?.message || "An error occurred.");
         } finally {
             setLoading(false);
         }

@@ -13,7 +13,7 @@ function Newblog() {
 
 
 
-        
+
         await newStory(inputs)
     }
     return (
@@ -24,7 +24,7 @@ function Newblog() {
                     <h1 className="text-3xl">Create New Blog</h1>
                 </div>
                 <Toaster />
-                <form onSubmit={handleSubmit} className="w-[450px] flex flex-col gap-3">
+                <form onSubmit={handleSubmit} encType="multipart/form-data" className="w-[450px] flex flex-col gap-3">
                     <label className="form-control w-full ">
                         <div className="label">
                             <span className="label-text">What is your blog title?</span>

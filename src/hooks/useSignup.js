@@ -47,6 +47,10 @@ function handleError({username, email, password}) {
         toast.error("Please fill all the fields.")
         return false
     }
+    if(username.length < 2) {
+        toast.error("Names must at least between 3 - 25 character.")
+        return false
+    }
     if (password.length < 6) {
         toast.error("Password must be at least 6 character.")
         return false

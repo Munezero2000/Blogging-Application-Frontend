@@ -8,6 +8,7 @@ import Blog from './pages/blog/Blogpage'
 import Newblog from './pages/blog/Newblog'
 import BlogPost from './pages/blog/BlogPost'
 import { useAuthContext } from './context/AuthContext'
+import Dashboard from './pages/dashboard/Dashboard'
 
 function App() {
   const { authUser } = useAuthContext()
@@ -20,7 +21,8 @@ function App() {
         <Route path='/signup' element={authUser ? <Navigate to="/" /> : <Signup />} />
         <Route path='/blog' element={<Blog />} />
         <Route path='/new-blog' element={<Newblog />} />
-        <Route path='/blog-post' element={<BlogPost />} />
+        <Route path='/blog-post/:title' element={<BlogPost />} />
+        <Route path='/dashboard' element={<Dashboard />} />
 
       </Routes>
     </>

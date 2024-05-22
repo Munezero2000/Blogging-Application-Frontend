@@ -1,12 +1,15 @@
 import { GoPlus } from "react-icons/go";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
+import useLogout from "../../hooks/useLogout";
+import { Toaster } from "react-hot-toast";
 
 function Navbar() {
     const { authUser } = useAuthContext()
-    // const { profilePicture } = authUser
+    const { logout } = useLogout()
     return (
         <div className="navbar bg-slate-400 dark:bg-slate-900">
+            <Toaster />
             <div className="flex-1">
                 <NavLink to="/" className="btn btn-ghost text-xl hover:bg-slate-450 dark:hover:bg-slate-900">Gabriel</NavLink>
             </div>
@@ -44,9 +47,9 @@ function Navbar() {
                                 </div>
                             </div>
                             <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow rounded-box w-52 dark:bg-slate-800 bg-slate-500">
-                                <li><a>Profile</a></li>
-                                <li><a>Dashboard</a></li>
-                                <li><a>Logout</a></li>
+                                <li><Link to="/profile">Profile</Link></li>
+                                <li><Link to="/dashboard">Dashboard</Link></li>
+                                <li><a onClick={logout}>Logout</a></li>
                             </ul>
                         </div>
                     </>
