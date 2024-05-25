@@ -7,6 +7,15 @@ const useSendComment = () => {
     const {selectedBlog, setSelectedBlog} = useStore()
 
     const sendComment = async(comment, blogId) => {
+
+        if (!comment) {
+            toast.error("Write your comment please")
+            return ;
+        }
+        if(comment.length > 10 || comment.length <= 1024) {
+            toast.error("Comment must be between 10 - 1024 character")
+            return;
+        }
         setLoading(true)
         try {
             const res = await fetch(`/api/comments/${blogId}/newComment`, {
