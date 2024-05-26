@@ -11,12 +11,15 @@ import { joinWithDash } from "../../utils/joinWithDash";
 import useStore from "../../../zustand/useStore";
 
 function Dashboard() {
-    const { setSelectedBlog } = useStore()
+    const { setSelectedBlog } = useStore();
     const [blogs, setBlogs] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const { authUser } = useAuthContext();
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentBlogPage, setCurrentBlogPage] = useState(1);
+    const [currentUserPage, setCurrentUserPage] = useState(1);
     const [blogsPerPage] = useState(5); // Number of blogs per page
+    const [usersPerPage] = useState(5); // Number of users per page
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
@@ -26,15 +29,35 @@ function Dashboard() {
             try {
                 const res = await fetch("/api/blogs/all");
                 const result = await res.json();
-                setBlogs(result.blogs);
+                setBlogs(result.blogs || []);
             } catch (error) {
                 console.error(error.message);
                 toast.error(error.message);
+                setBlogs([]);
             } finally {
                 setLoading(false);
             }
         };
         fetchBlogs();
+    }, []);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            try {
+                const res = await axios.get("/api/users/", { withCredentials: true });
+                console.log(res.data);
+                const result = res.data;
+                setUsers(result.data || []);
+            } catch (error) {
+                console.error(error.message);
+                toast.error(error.message);
+                setUsers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsers();
     }, []);
 
     // Debounced search function to improve performance
@@ -44,7 +67,7 @@ function Dashboard() {
                 blog.title.toLowerCase().includes(query.toLowerCase())
             );
             setSearchResults(filteredBlogs);
-            setCurrentPage(1); // Reset to first page on new search
+            setCurrentBlogPage(1); // Reset to first page on new search
         }, 300),
         [blogs]
     );
@@ -58,10 +81,14 @@ function Dashboard() {
     }, [searchQuery, handleSearch]);
 
     // Logic to get current blogs
-    const currentBlogs = (searchQuery ? searchResults : blogs).slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
+    const currentBlogs = (searchQuery ? searchResults : blogs).slice((currentBlogPage - 1) * blogsPerPage, currentBlogPage * blogsPerPage);
+
+    // Logic to get current users
+    const currentUsers = users.slice((currentUserPage - 1) * usersPerPage, currentUserPage * usersPerPage);
 
     // Change page
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const paginateBlogs = (pageNumber) => setCurrentBlogPage(pageNumber);
+    const paginateUsers = (pageNumber) => setCurrentUserPage(pageNumber);
 
     // Function to handle delete blog
     const handleDelete = async (id) => {
@@ -106,26 +133,35 @@ function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <div className="flex items-center gap-3">
-                                                    <div>
-                                                        <div className="font-bold">Hart Hagerty</div>
+                                        {currentUsers.filter(user => user.id !== authUser.id).map((user) => (
+                                            <tr key={user.id}>
+                                                <td>
+                                                    <div className="flex items-center gap-3">
+                                                        <div>
+                                                            <div className="font-bold">{user.name}</div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                Zemlak, Daniel and Leannon
-                                                <br />
-                                                <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
-                                            </td>
-                                            <td>Purple</td>
-                                            <th>
-                                                <button className="btn btn-ghost btn-xs">details</button>
-                                            </th>
-                                        </tr>
+                                                </td>
+                                                <td>{user.email}</td>
+                                                <td>{user.role}</td>
+                                                <th>
+                                                    <button className="btn btn-ghost btn-xs">details</button>
+                                                </th>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
+                                <nav className="flex justify-center gap-2">
+                                    <ul className="join gap-3">
+                                        {Array.from({ length: Math.ceil((users || []).length / usersPerPage) }).map((_, index) => (
+                                            <li key={index} className="page-item">
+                                                <button onClick={() => paginateUsers(index + 1)} className="page-link join-item btn">
+                                                    {index + 1}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
 
@@ -176,37 +212,53 @@ function Dashboard() {
                                                         <div className="flex items-center gap-3">
                                                             <div className="avatar">
                                                                 <div className="mask mask-squircle w-12 h-12">
-                                                                    <img src={`http://localhost:8081/uploads/${blog.blogThumbnail}`} alt="Blog Thumbnail" />
+                                                                    <img
+                                                                        src={blog.imageUrl}
+                                                                        alt="Blog Thumbnail"
+                                                                        className="object-cover object-center"
+                                                                    />
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold">{shortTitle(blog.title)}</div>
+                                                                <div className="font-bold">
+                                                                    <NavLink
+                                                                        to={`/blogs/${joinWithDash(blog.title)}`}
+                                                                        onClick={() => setSelectedBlog(blog)}
+                                                                    >
+                                                                        {shortTitle(blog.title)}
+                                                                    </NavLink>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td>{shortStory(blog.content)}</td>
+                                                    <td>{shortStory(blog.body)}</td>
                                                     <td>{blog.category}</td>
-                                                    <td>{authUser.names}</td>
-                                                    <td>{formatDate(blog.publicationDate)}</td>
-                                                    <th className="flex">
-                                                        <button className="btn btn-ghost btn-xs text-red-500" onClick={() => handleDelete(blog.id)}>Delete</button>
-                                                        {/* <button className="btn btn-ghost btn-xs text-blue-600">Update</button> */}
-                                                        <NavLink to={`/blog-post/${joinWithDash(blog.title)}`} onClick={() => setSelectedBlog(blog)} className="btn btn-ghost btn-xs text-fuchsia-500">View</NavLink>
+                                                    <td>{blog.author.name}</td>
+                                                    <td>{formatDate(blog.createdAt)}</td>
+                                                    <th>
+                                                        <button
+                                                            onClick={() => handleDelete(blog.id)}
+                                                            className="btn btn-ghost btn-xs text-red-500"
+                                                        >
+                                                            Delete
+                                                        </button>
                                                     </th>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="6">No blogs found.</td>
+                                                <td colSpan="6" className="text-center">
+                                                    No blogs found.
+                                                </td>
                                             </tr>
                                         )}
                                     </tbody>
                                 </table>
                                 <nav className="flex justify-center gap-2">
                                     <ul className="join gap-3">
-                                        {Array.from({ length: Math.ceil((searchQuery ? searchResults.length : blogs.length) / blogsPerPage) }).map((_, index) => (
+                                        {Array.from({ length: Math.ceil((searchQuery ? searchResults : blogs).length / blogsPerPage) }).map((_, index) => (
                                             <li key={index} className="page-item">
-                                                <button onClick={() => paginate(index + 1)} className="page-link join-item btn">
+                                                <button onClick={() => paginateBlogs(index + 1)} className="page-link join-item btn">
                                                     {index + 1}
                                                 </button>
                                             </li>
@@ -215,9 +267,6 @@ function Dashboard() {
                                 </nav>
                             </div>
                         </div>
-
-                        <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Subscribed" />
-                        <div role="tabpanel" className="tab-content p-10">Tab content 3</div>
                     </div>
                 </div>
             </div>
