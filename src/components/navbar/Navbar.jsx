@@ -10,8 +10,8 @@ function Navbar() {
     return (
         <div className="navbar bg-slate-400 dark:bg-slate-900">
             <Toaster />
-            <div className="flex-1">
-                <NavLink to="/" className="btn btn-ghost text-xl hover:bg-slate-450 dark:hover:bg-slate-900">Gabriel & Patience</NavLink>
+            <div className="flex-1 flex justify-center">
+                <NavLink to="/" className="btn btn-ghost text-xl hover:bg-slate-450 dark:hover:bg-slate-900">Gabriel & Patience Blog</NavLink>
             </div>
             <div className="flex-none">
                 <ul className="menu menu-horizontal px-1 flex gap-3">
