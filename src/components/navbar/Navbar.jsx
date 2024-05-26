@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 
 function Navbar() {
     const { authUser } = useAuthContext()
+    console.log(authUser)
     const { logout } = useLogout()
     return (
         <div className="navbar bg-slate-400 dark:bg-slate-900">
@@ -48,7 +49,7 @@ function Navbar() {
                             </div>
                             <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow rounded-box w-52 dark:bg-slate-800 bg-slate-500">
 
-                                <li><Link to="/dashboard">Dashboard</Link></li>
+                                {authUser.role === "ADMIN" && (<li><Link to="/dashboard">Dashboard</Link></li>)}
                                 <li><a onClick={logout}>Logout</a></li>
                             </ul>
                         </div>
