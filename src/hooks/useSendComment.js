@@ -12,7 +12,7 @@ const useSendComment = () => {
             toast.error("Write your comment please")
             return ;
         }
-        if(comment.length > 10 || comment.length <= 1024) {
+        if(comment.length < 10) {
             toast.error("Comment must be between 10 - 1024 character")
             return;
         }
