@@ -7,7 +7,11 @@ const useNewStory = () => {
 
     const newStory = async ({ title, genre, thumbnail, story }) => {
         if(!title || !genre || !thumbnail || !story) {
-            toast.error("Fill all fields")
+            toast.error("Fill all fields please")
+            return;
+        }
+        if(story.length < 200) {
+            toast.error("Your story can't be less that 200 characters")
             return;
         }
         setLoading(true);
