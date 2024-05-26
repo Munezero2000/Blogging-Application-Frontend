@@ -89,7 +89,7 @@ function Dashboard() {
     return (
         <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white">
             <Navbar />
-            <div className="border w-full p-5">
+            <div className=" w-full p-5">
                 <h2>Dashboard</h2>
                 <div>
                     <div role="tablist" className="tabs tabs-bordered">
