@@ -45,7 +45,7 @@ function Dashboard() {
                 <h2>Dashboard </h2>
                 <div className="">
                     <div role="tablist" className="tabs tabs-bordered">
-                        <input type="radio" name="my_tabs_1" role="tab" className="tab border" aria-label="Users" />
+                        <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Users" />
                         {/* All users */}
                         <div role="tabpanel" className="tab-content p-10">
                             <div className="">
