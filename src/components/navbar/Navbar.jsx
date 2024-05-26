@@ -6,7 +6,6 @@ import { Toaster } from "react-hot-toast";
 
 function Navbar() {
     const { authUser } = useAuthContext()
-    console.log(authUser)
     const { logout } = useLogout()
     return (
         <div className="navbar bg-slate-400 dark:bg-slate-900">

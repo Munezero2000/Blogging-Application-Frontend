@@ -23,6 +23,7 @@ function Dashboard() {
     const [userSearchQuery, setUserSearchQuery] = useState(""); // State for user search query
     const [userSearchResults, setUserSearchResults] = useState([]);
 
+
     useEffect(() => {
         const fetchBlogs = async () => {
             setLoading(true);
@@ -127,7 +128,7 @@ function Dashboard() {
     };
 
     return (
-        <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white">
+        <div className="p-4 h-full flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white">
             <Navbar />
             <div className=" w-full p-5">
                 <h2>Dashboard</h2>
