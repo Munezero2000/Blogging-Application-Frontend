@@ -20,6 +20,8 @@ function Dashboard() {
     const [blogsPerPage] = useState(5); // Number of blogs per page
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [userSearchQuery, setUserSearchQuery] = useState(""); // State for user search query
+    const [userSearchResults, setUserSearchResults] = useState([]);
 
     useEffect(() => {
         const fetchBlogs = async () => {
@@ -44,7 +46,7 @@ function Dashboard() {
             try {
                 const res = await axios.get("/api/users/", { withCredentials: true });
                 setUsers(res.data); // Assuming your API response has a data property
-                console.log(res)
+
             } catch (error) {
                 console.error(error.message);
                 toast.error(error.message);
@@ -66,6 +68,18 @@ function Dashboard() {
         }, 300),
         [blogs]
     );
+    // Debounced search function to improve performance for users
+    const handleUserSearch = useCallback(
+        debounce((query) => {
+            const filteredUsers = users.filter((user) =>
+                (user.name && user.name.toLowerCase().includes(query.toLowerCase())) ||
+                (user.email && user.email.toLowerCase().includes(query.toLowerCase()))
+            );
+            setUserSearchResults(filteredUsers);
+            setCurrentPage(1); // Reset to first page on new search
+        }, 300),
+        [users]
+    );
 
     useEffect(() => {
         if (searchQuery) {
@@ -74,6 +88,14 @@ function Dashboard() {
             setSearchResults([]);
         }
     }, [searchQuery, handleSearch]);
+
+    useEffect(() => {
+        if (userSearchQuery) {
+            handleUserSearch(userSearchQuery);
+        } else {
+            setUserSearchResults([]);
+        }
+    }, [userSearchQuery, handleUserSearch]);
 
     // Logic to get current blogs
     const currentBlogs = (searchQuery ? searchResults : blogs).slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
@@ -115,27 +137,13 @@ function Dashboard() {
                         <div role="tabpanel" className="tab-content p-10">
                             <div className="overflow-x-auto">
                                 <div className="flex justify-end">
-                                    <form className="w-[500px] flex gap-2 self-end">
-                                        <label className="input input-bordered flex items-center gap-2">
-                                            <input
-                                                type="text"
-                                                className="grow"
-                                                placeholder="Search"
-                                            />
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                fill="currentColor"
-                                                className="w-4 h-4 opacity-70"
-                                            >
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
-                                        </label>
-                                    </form>
+                                    <input
+                                        type="text"
+                                        className="input input-bordered"
+                                        placeholder="Search Users"
+                                        value={userSearchQuery}
+                                        onChange={(e) => setUserSearchQuery(e.target.value)}
+                                    />
 
                                 </div>
                                 <table className="table">
@@ -148,8 +156,8 @@ function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {users.length > 0 ? (
-                                            users.map((user) => (
+                                        {(userSearchQuery ? userSearchResults : users).length > 0 ? (
+                                            (userSearchQuery ? userSearchResults : users).map((user) => (
                                                 <tr key={user.id}>
                                                     <td>
                                                         <div className="flex items-center gap-3">
