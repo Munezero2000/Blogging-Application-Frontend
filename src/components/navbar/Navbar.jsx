@@ -11,7 +11,7 @@ function Navbar() {
         <div className="navbar bg-slate-400 dark:bg-slate-900">
             <Toaster />
             <div className="flex-1">
-                <NavLink to="/" className="btn btn-ghost text-xl hover:bg-slate-450 dark:hover:bg-slate-900">Gabriel</NavLink>
+                <NavLink to="/" className="btn btn-ghost text-xl hover:bg-slate-450 dark:hover:bg-slate-900">Gabriel & Patience</NavLink>
             </div>
             <div className="flex-none">
                 <ul className="menu menu-horizontal px-1 flex gap-3">
@@ -47,7 +47,7 @@ function Navbar() {
                                 </div>
                             </div>
                             <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow rounded-box w-52 dark:bg-slate-800 bg-slate-500">
-                                <li><Link to="/profile">Profile</Link></li>
+
                                 <li><Link to="/dashboard">Dashboard</Link></li>
                                 <li><a onClick={logout}>Logout</a></li>
                             </ul>

@@ -16,7 +16,7 @@ function Comments({ blogId, blogComment }) {
         console.log(selectedBlog)
     }
     return (
-        <div className='border w-full p-5 flex items-center justify-center'>
+        <div className='w-full p-5 flex items-center justify-center'>
             <div className='w-[700px] flex flex-col gap-7'>
                 <form onSubmit={handleSendComment} className='flex justify-between items-center'>
                     <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="Your comment" className="textarea textarea-bordered textarea-xs basis-11/12  border" ></textarea>
