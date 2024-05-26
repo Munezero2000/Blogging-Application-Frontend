@@ -14,6 +14,10 @@ const useNewStory = () => {
             toast.error("Your story can't be less that 200 characters")
             return;
         }
+        if(title.length < 5) {
+            toast.error("Title must not be less than 5 characters")
+            return;
+        }
         setLoading(true);
         try {
             const formData = new FormData();
