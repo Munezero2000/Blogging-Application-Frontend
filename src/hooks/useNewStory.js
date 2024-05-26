@@ -6,6 +6,10 @@ const useNewStory = () => {
     const [loading, setLoading] = useState(false);
 
     const newStory = async ({ title, genre, thumbnail, story }) => {
+        if(!title || !genre || !thumbnail || !story) {
+            toast.error("Fill all fields")
+            return;
+        }
         setLoading(true);
         try {
             const formData = new FormData();
