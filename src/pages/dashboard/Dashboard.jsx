@@ -1,96 +1,135 @@
-import { useEffect, useState } from "react";
-import Navbar from "../../components/navbar/Navbar"
+import { useEffect, useState, useCallback } from "react";
+import Navbar from "../../components/navbar/Navbar";
 import toast from "react-hot-toast";
 import { shortStory, shortTitle } from "../../utils/displayShortChar";
 import { useAuthContext } from "../../context/AuthContext";
 import { formatDate } from "../../utils/formatDate";
+import debounce from "lodash.debounce";
 
 function Dashboard() {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { authUser } = useAuthContext()
+    const { authUser } = useAuthContext();
     const [currentPage, setCurrentPage] = useState(1);
     const [blogsPerPage] = useState(5); // Number of blogs per page
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
 
     useEffect(() => {
         const fetchBlogs = async () => {
-            setLoading(true)
+            setLoading(true);
             try {
-                const res = await fetch("/api/blogs/all")
-                const result = await res.json()
-
-                setBlogs(result.blogs)
+                const res = await fetch("/api/blogs/all");
+                const result = await res.json();
+                setBlogs(result.blogs);
             } catch (error) {
-                console.log(error.message)
-                toast.error(error.message)
+                console.error(error.message);
+                toast.error(error.message);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
+        };
+        fetchBlogs();
+    }, []);
+
+    // Debounced search function to improve performance
+    const handleSearch = useCallback(
+        debounce((query) => {
+            const filteredBlogs = blogs.filter((blog) =>
+                blog.title.toLowerCase().includes(query.toLowerCase())
+            );
+            setSearchResults(filteredBlogs);
+            setCurrentPage(1); // Reset to first page on new search
+        }, 300),
+        [blogs]
+    );
+
+    useEffect(() => {
+        if (searchQuery) {
+            handleSearch(searchQuery);
+        } else {
+            setSearchResults([]);
         }
-        fetchBlogs()
-    }, [])
+    }, [searchQuery, handleSearch]);
 
     // Logic to get current blogs
-    const indexOfLastBlog = currentPage * blogsPerPage;
-    const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-    const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+    const currentBlogs = (searchQuery ? searchResults : blogs).slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage);
 
     // Change page
-    const paginate = pageNumber => setCurrentPage(pageNumber);
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white  ">
+        <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white">
             <Navbar />
             <div className="border w-full p-5">
-                <h2>Dashboard </h2>
-                <div className="">
+                <h2>Dashboard</h2>
+                <div>
                     <div role="tablist" className="tabs tabs-bordered">
                         <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Users" />
-                        {/* All users */}
-                        <div role="tabpanel" className="tab-content p-10">
-                            <div className="">
-                                <div className="overflow-x-auto">
-                                    <table className="table">
-                                        {/* head */}
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Role</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* row 1 */}
-                                            <tr>
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div>
-                                                            <div className="font-bold">Hart Hagerty</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    Zemlak, Daniel and Leannon
-                                                    <br />
-                                                    <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
-                                                </td>
-                                                <td>Purple</td>
-                                                <th>
-                                                    <button className="btn btn-ghost btn-xs">details</button>
-                                                </th>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Blogs" checked />
                         <div role="tabpanel" className="tab-content p-10">
                             <div className="overflow-x-auto">
                                 <table className="table">
-                                    {/* head */}
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div>
+                                                        <div className="font-bold">Hart Hagerty</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                Zemlak, Daniel and Leannon
+                                                <br />
+                                                <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
+                                            </td>
+                                            <td>Purple</td>
+                                            <th>
+                                                <button className="btn btn-ghost btn-xs">details</button>
+                                            </th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Blogs" defaultChecked />
+                        <div role="tabpanel" className="tab-content p-10">
+                            <div className="overflow-x-auto">
+                                <div className="flex justify-end">
+                                    <form className="w-[500px] flex gap-2 self-end">
+                                        <label className="input input-bordered flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                className="grow"
+                                                placeholder="Search"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                fill="currentColor"
+                                                className="w-4 h-4 opacity-70"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </label>
+                                    </form>
+                                </div>
+                                <table className="table">
                                     <thead>
                                         <tr>
                                             <th>Blog Title</th>
@@ -102,44 +141,42 @@ function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* row 1 */}
-                                        {blogs.length > 0
-                                            ? (
-                                                currentBlogs.map(blog =>
-
-                                                    <tr key={blog.id}>
-                                                        <td>
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="avatar">
-                                                                    <div className="mask mask-squircle w-12 h-12">
-                                                                        <img src={`http://localhost:8081/uploads/${blog.blogThumbnail}`} alt="Avatar Tailwind CSS Component" />
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-bold">{shortTitle(blog.title)}</div>
+                                        {currentBlogs.length > 0 ? (
+                                            currentBlogs.map((blog) => (
+                                                <tr key={blog.id}>
+                                                    <td>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="avatar">
+                                                                <div className="mask mask-squircle w-12 h-12">
+                                                                    <img src={`http://localhost:8081/uploads/${blog.blogThumbnail}`} alt="Blog Thumbnail" />
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td>{shortStory(blog.content)}</td>
-                                                        <td>{blog.category}</td>
-                                                        <td>{authUser.names}</td>
-                                                        <td>{formatDate(blog.publicationDate)}</td>
-                                                        <th className="flex">
-                                                            <button className="btn btn-ghost btn-xs text-red-500">Delete</button>
-                                                            <button className="btn btn-ghost btn-xs text-blue-600">Update</button>
-                                                            <button className="btn btn-ghost btn-xs text-fuchsia-500">View</button>
-                                                        </th>
-                                                    </tr>
-                                                )
-
-                                            )
-                                            : (<h1>No blog yet</h1>)}
+                                                            <div>
+                                                                <div className="font-bold">{shortTitle(blog.title)}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>{shortStory(blog.content)}</td>
+                                                    <td>{blog.category}</td>
+                                                    <td>{authUser.names}</td>
+                                                    <td>{formatDate(blog.publicationDate)}</td>
+                                                    <th className="flex">
+                                                        <button className="btn btn-ghost btn-xs text-red-500">Delete</button>
+                                                        <button className="btn btn-ghost btn-xs text-blue-600">Update</button>
+                                                        <button className="btn btn-ghost btn-xs text-fuchsia-500">View</button>
+                                                    </th>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="6">No blogs found.</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
-                                {/* Pagination */}
                                 <nav className="flex justify-center gap-2">
                                     <ul className="join gap-3">
-                                        {Array.from({ length: Math.ceil(blogs.length / blogsPerPage) }).map((_, index) => (
+                                        {Array.from({ length: Math.ceil((searchQuery ? searchResults.length : blogs.length) / blogsPerPage) }).map((_, index) => (
                                             <li key={index} className="page-item">
                                                 <button onClick={() => paginate(index + 1)} className="page-link join-item btn">
                                                     {index + 1}
@@ -157,7 +194,7 @@ function Dashboard() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default Dashboard
+export default Dashboard;
