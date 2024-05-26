@@ -13,6 +13,7 @@ import useStore from "../../../zustand/useStore";
 function Dashboard() {
     const { setSelectedBlog } = useStore()
     const [blogs, setBlogs] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const { authUser } = useAuthContext();
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +36,23 @@ function Dashboard() {
             }
         };
         fetchBlogs();
+    }, []);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            try {
+                const res = await axios.get("/api/users/", { withCredentials: true });
+                setUsers(res.data); // Assuming your API response has a data property
+                console.log(res)
+            } catch (error) {
+                console.error(error.message);
+                toast.error(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsers();
     }, []);
 
     // Debounced search function to improve performance
@@ -96,6 +114,30 @@ function Dashboard() {
                         <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Users" />
                         <div role="tabpanel" className="tab-content p-10">
                             <div className="overflow-x-auto">
+                                <div className="flex justify-end">
+                                    <form className="w-[500px] flex gap-2 self-end">
+                                        <label className="input input-bordered flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                className="grow"
+                                                placeholder="Search"
+                                            />
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                fill="currentColor"
+                                                className="w-4 h-4 opacity-70"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </label>
+                                    </form>
+
+                                </div>
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -106,24 +148,29 @@ function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <div className="flex items-center gap-3">
-                                                    <div>
-                                                        <div className="font-bold">Hart Hagerty</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                Munezero ange
-                                                <br />
-                                                <span className="badge badge-ghost badge-sm">Author</span>
-                                            </td>
-                                            <td>munezeaange@gmail.com</td>
-                                            <th>
-                                                {/* <button className="btn btn-ghost btn-xs">details</button> */}
-                                            </th>
-                                        </tr>
+                                        {users.length > 0 ? (
+                                            users.map((user) => (
+                                                <tr key={user.id}>
+                                                    <td>
+                                                        <div className="flex items-center gap-3">
+                                                            <div>
+                                                                <div className="font-bold">{user.names}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>{user.email}</td>
+                                                    <td>{user.role}</td>
+                                                    <th>
+                                                        <button className="btn btn-ghost btn-xs">details</button>
+                                                    </th>
+                                                </tr>
+                                            )
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="4">No users found.</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -216,8 +263,8 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Subscribed" />
-                        <div role="tabpanel" className="tab-content p-10">Tab content 3</div>
+                        {/* <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Subscribed" />
+                        <div role="tabpanel" className="tab-content p-10">Tab content 3</div> */}
                     </div>
                 </div>
             </div>
