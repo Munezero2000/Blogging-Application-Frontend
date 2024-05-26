@@ -5,8 +5,13 @@ import { shortStory, shortTitle } from "../../utils/displayShortChar";
 import { useAuthContext } from "../../context/AuthContext";
 import { formatDate } from "../../utils/formatDate";
 import debounce from "lodash.debounce";
+import { NavLink } from "react-router-dom";
+import axios from "axios";
+import { joinWithDash } from "../../utils/joinWithDash";
+import useStore from "../../../zustand/useStore";
 
 function Dashboard() {
+    const { setSelectedBlog } = useStore()
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const { authUser } = useAuthContext();
@@ -57,6 +62,29 @@ function Dashboard() {
 
     // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // Function to handle delete blog
+    const handleDelete = async (id) => {
+        setLoading(true);
+        try {
+            const res = await axios.delete(`/api/blogs/delete/${id}`, {
+                withCredentials: true
+            });
+            if (res.status === 200) {
+                setBlogs(blogs.filter((blog) => blog.id !== id));
+                setSearchResults(searchResults.filter((blog) => blog.id !== id));
+                toast.success("Blog deleted successfully!");
+            } else {
+                const result = await res.json();
+                toast.error(result.message || "Failed to delete the blog");
+            }
+        } catch (error) {
+            console.error(error.message);
+            toast.error("Failed to delete the blog");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white">
@@ -161,9 +189,9 @@ function Dashboard() {
                                                     <td>{authUser.names}</td>
                                                     <td>{formatDate(blog.publicationDate)}</td>
                                                     <th className="flex">
-                                                        <button className="btn btn-ghost btn-xs text-red-500">Delete</button>
-                                                        <button className="btn btn-ghost btn-xs text-blue-600">Update</button>
-                                                        <button className="btn btn-ghost btn-xs text-fuchsia-500">View</button>
+                                                        <button className="btn btn-ghost btn-xs text-red-500" onClick={() => handleDelete(blog.id)}>Delete</button>
+                                                        {/* <button className="btn btn-ghost btn-xs text-blue-600">Update</button> */}
+                                                        <NavLink to={`/blog-post/${joinWithDash(blog.title)}`} onClick={() => setSelectedBlog(blog)} className="btn btn-ghost btn-xs text-fuchsia-500">View</NavLink>
                                                     </th>
                                                 </tr>
                                             ))
