@@ -14,7 +14,7 @@ const useNewStory = () => {
             formData.append('blogThumbnail', thumbnail);
             formData.append('content', story);
 
-            const res = await axios.post("http://localhost:8081/api/blogs/create", formData, {
+            const res = await axios.post("/api/blogs/create", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },

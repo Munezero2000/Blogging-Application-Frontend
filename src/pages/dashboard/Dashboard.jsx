@@ -9,7 +9,8 @@ function Dashboard() {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const { authUser } = useAuthContext()
-    console.log(authUser)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [blogsPerPage] = useState(5); // Number of blogs per page
 
     useEffect(() => {
         const fetchBlogs = async () => {
@@ -17,7 +18,7 @@ function Dashboard() {
             try {
                 const res = await fetch("/api/blogs/all")
                 const result = await res.json()
-                console.log(result)
+
                 setBlogs(result.blogs)
             } catch (error) {
                 console.log(error.message)
@@ -28,12 +29,21 @@ function Dashboard() {
         }
         fetchBlogs()
     }, [])
+
+    // Logic to get current blogs
+    const indexOfLastBlog = currentPage * blogsPerPage;
+    const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+    const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+
+    // Change page
+    const paginate = pageNumber => setCurrentPage(pageNumber);
+
     return (
         <div className="p-4 h-screen flex flex-col items-center justify-start w-full bg-slate-400 dark:bg-slate-900 dark:text-white  ">
             <Navbar />
             <div className="border w-full p-5">
                 <h2>Dashboard </h2>
-                <div className="border">
+                <div className="">
                     <div role="tablist" className="tabs tabs-bordered">
                         <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="All User" />
                         {/* All users */}
@@ -95,7 +105,7 @@ function Dashboard() {
                                         {/* row 1 */}
                                         {blogs.length > 0
                                             ? (
-                                                blogs.map(blog =>
+                                                currentBlogs.map(blog =>
 
                                                     <tr key={blog.id}>
                                                         <td>
@@ -114,8 +124,10 @@ function Dashboard() {
                                                         <td>{blog.category}</td>
                                                         <td>{authUser.names}</td>
                                                         <td>{formatDate(blog.publicationDate)}</td>
-                                                        <th>
-                                                            <button className="btn btn-ghost btn-xs">details</button>
+                                                        <th className="flex">
+                                                            <button className="btn btn-ghost btn-xs text-red-500">Delete</button>
+                                                            <button className="btn btn-ghost btn-xs text-blue-600">Update</button>
+                                                            <button className="btn btn-ghost btn-xs text-fuchsia-500">View</button>
                                                         </th>
                                                     </tr>
                                                 )
@@ -124,6 +136,18 @@ function Dashboard() {
                                             : (<h1>No blog yet</h1>)}
                                     </tbody>
                                 </table>
+                                {/* Pagination */}
+                                <nav className="flex justify-center gap-2">
+                                    <ul className="join gap-3">
+                                        {Array.from({ length: Math.ceil(blogs.length / blogsPerPage) }).map((_, index) => (
+                                            <li key={index} className="page-item">
+                                                <button onClick={() => paginate(index + 1)} className="page-link join-item btn">
+                                                    {index + 1}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
 
